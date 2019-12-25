@@ -50,9 +50,7 @@ end
 def perfect_match
   @trucks.each do |truck|
     if perfect_match = @shipments.find { |shp| shp[:size] == truck[:max_capacity] }
-      truck[:shipments] << perfect_match
-      @shipments.delete(perfect_match)
-      truck[:current_allocation] += perfect_match[:size]
+      perform_allocation(truck, perfect_match)
     end
   end
 end
@@ -63,9 +61,7 @@ def fill_capacity(truck)
     shipments = @shipments.select { |shp| shp[:size] < truck_remaining_capacity(truck)} # reduce selections so we don't have to loop through as many options
     optimized = optimize_selections(truck_remaining_capacity(truck), shipments)
     optimized.each do |shipment|
-      truck[:shipments] << shipment
-      @shipments.delete(shipment)
-      truck[:current_allocation] += shipment[:size]
+      perform_allocation(truck, shipment)
     end
     smallest_shipment_size = @shipments.last[:size]
   end
@@ -114,4 +110,10 @@ def add_shipments_remaining
     cumulative += shipment[:size]
   end
   cumulative
+end
+
+def perform_allocation(truck, shipment)
+  truck[:shipments] << shipment
+  @shipments.delete(shipment)
+  truck[:current_allocation] += shipment[:size]
 end
